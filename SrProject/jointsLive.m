@@ -41,7 +41,6 @@ pos = strfind(cname,'.');
 if ~isempty(pos)
   cname = cname(pos(end)+1:end);
 end
-
 function [fig, ax1, ax2] = figureSetup(trial1_ArmPosition)
 % figureSetup sets up figure window for webcam feed and bar chart for
 % classification probability
