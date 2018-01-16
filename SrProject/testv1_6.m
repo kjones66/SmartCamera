@@ -23,19 +23,19 @@ while ishandle(himg)
     imshow(depthMap, [0 4096]);
     
     if sum(depthMetaData.IsSkeletonTracked) > 0
-        % Prep to log data in one line
-        fid = fopen('test.csv', 'w') ;
-        filename = 'AmyOut.csv';
-        sprintf(filename);
-        d = depthMetaData;
-        [JDI,JII,JTS,JWC,PDI,PII,PWC,SD] = transformData (d);
-        % Log data
-        dlmwrite(filename,[d.AbsTime,d.FrameNumber,...
-            d.IsPositionTracked,d.IsSkeletonTracked,...
-            JDI,JII,JWC,PDI,PII,PWC,d.RelativeFrame,... %Add Segmentation Data
-            d.SkeletonTrackingID,d.TriggerIndex],'-append','delimiter',',')
-        % Save data
-        fclose(fid)
+%         % Prep to log data in one line
+%         fid = fopen('test.csv', 'w') ;
+%         filename = 'AmyOut.csv';
+%         sprintf(filename);
+%         d = depthMetaData;
+%         [JDI,JII,JTS,JWC,PDI,PII,PWC,SD] = transformData (d);
+%         % Log data
+%         dlmwrite(filename,[d.AbsTime,d.FrameNumber,...
+%             d.IsPositionTracked,d.IsSkeletonTracked,...
+%             JDI,JII,JWC,PDI,PII,PWC,d.RelativeFrame,... %Add Segmentation Data
+%             d.SkeletonTrackingID,d.TriggerIndex],'-append','delimiter',',')
+%         % Save data
+%         fclose(fid)
         
         % Prep data for plotting
         numberOfPeople = sum(depthMetaData.IsSkeletonTracked);
@@ -52,14 +52,19 @@ while ishandle(himg)
                 joints = [[joints],depthMetaData.JointDepthIndices(:,:,j)];
             end
         end
-        
+        SJ = daTr20by2(skeletonJoints(:,:,1));
+        SJ2 = daTr20by2(skeletonJoints(:,:,2));
+
        % Plot skeleton joints  
        hold on;
        for i = 1:numberOfPeople
            plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),'*');
        end
-       
-       
+       modelType = courseG_Model.ClassificationSVM; 
+       yfit = predict(modelType, SJ);
+       yfit2 = predict(modelType, SJ2);
+       display(yfit, yfit2)
+
 %        position = trainedModel.predictFcn([skeletonJoints(3,1,1),skeletonJoints(3,2,1)])
 % 
 % %        position = TrainedModel.predictFcn(depthMetaData.JointDepthIndices(3,:,6))
