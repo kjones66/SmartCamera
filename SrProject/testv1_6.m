@@ -14,7 +14,7 @@ start(depthVid);
 himg = figure;
 j=0;
 zeros19 = zeros(19, 1);
-modelType = courseG_Model.ClassificationSVM; 
+modelType = trainedModel.ClassificationSVM; 
 
 
 % Run Kinect
@@ -51,28 +51,29 @@ while ishandle(himg)
                 index = [[index],j];
                 count = count +1;
                 joints = [[joints],depthMetaData.JointDepthIndices(:,:,j)];
-                SJ = daTr20by2(skeletonJoints(:,:,j));
-                yfit = predict(modelType, SJ);
-                display(yfit)
+                %SJ = daTr20by2(skeletonJoints(:,:,j));
             end
         end
-
+%        modelType = courseG_Model.ClassificationSVM; 
+        person = depthMetaData.IsSkeletonTracked;
+       [predictedPosition, scoreML] = predict(modelType, [[depthMetaData.JointDepthIndices(7,:,person)],...
+           [depthMetaData.JointDepthIndices(11,:,person)],...
+           [depthMetaData.JointDepthIndices(13,:,person)],...
+           [depthMetaData.JointDepthIndices(17,:,person)]]);
+       display(predictedPosition)
+       %predictedPosition = yfit.LABEL();
        % Plot skeleton joints  
        hold on;
        for i = 1:numberOfPeople
            plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),'*');
        end
-%        modelType = courseG_Model.ClassificationSVM; 
-%        yfit = predict(modelType, SJ);
-%        yfit2 = predict(modelType, SJ2);
-%        display(yfit, yfit2)
-
 %        position = trainedModel.predictFcn([skeletonJoints(3,1,1),skeletonJoints(3,2,1)])
 % 
 % %        position = TrainedModel.predictFcn(depthMetaData.JointDepthIndices(3,:,6))
 %        print (position)
        
        hold off;
+       legend(predictedPosition);
     end
 end
 
