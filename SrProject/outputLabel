@@ -1,0 +1,11 @@
+ % Step 4: Plot Results
+    try
+        imshow(insertText(img,[640,1],upper(cellstr(imagepred)),...
+            'AnchorPoint','RightTop','FontSize',50,'BoxColor','Green',...
+            'BoxOpacity',0.4),'Parent',ax1);    
+        ax2.Children.YData = probabilities;
+        ax2.YLim = [0 1];
+    catch err
+    end
+    drawnow
+end 
