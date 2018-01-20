@@ -60,7 +60,7 @@ while ishandle(himg)
            [depthMetaData.JointDepthIndices(11,:,person)],...
            [depthMetaData.JointDepthIndices(13,:,person)],...
            [depthMetaData.JointDepthIndices(17,:,person)]]);
-       display(predictedPosition)
+       %display(predictedPosition(end))
        %predictedPosition = yfit.LABEL();
        % Plot skeleton joints  
        hold on;
@@ -73,7 +73,8 @@ while ishandle(himg)
 %        print (position)
        
        hold off;
-       legend(predictedPosition);
+       aLabel = string(predictedPosition(end))
+       legend(aLabel);
     end
 end
 
