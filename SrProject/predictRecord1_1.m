@@ -18,7 +18,7 @@ start(depthVid);
 himg = figure;
 j=0;
 zeros19 = zeros(19, 1);
-% ----------------modelType = trainedModel.ClassificationSVM; 
+modelType = trainedModel.ClassificationSVM; 
 oldData = 0;
 firstLoop = 1;
 
