@@ -33,7 +33,7 @@ while ishandle(himg)
         src2
         % Prep to log data in one line
         fid = fopen('test.csv', 'w') ;
-        filename = 'Log1.csv';
+        filename = 'trial3_OutNear.csv';
         sprintf(filename);
         d = depthMetaData;
         [JDI,JII,JTS,JWC,PDI,PII,PWC,SD] = transformData (d);
@@ -50,7 +50,7 @@ while ishandle(himg)
             diff = dataLine - oldData;
             
             fid = fopen('test.csv', 'w') ;
-            filename = 'Log2.csv';
+            filename = 'trial3_OutNearDistance.csv';
             sprintf(filename);
             dlmwrite(filename,diff,'-append','delimiter',',');
             % Save data
