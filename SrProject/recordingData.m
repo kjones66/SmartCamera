@@ -83,7 +83,7 @@ while ishandle(himg)
        hold on;
        for i = 1:numberOfPeople
                num = num2str(i);
-               plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),':o');
+               plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),lineOptions(i));
                thisLabel = ["Person " + num];
                allLabels = [allLabels, thisLabel];
        end        
