@@ -1,3 +1,8 @@
+clc; clear all; close all;
+load('t3_depthModel.mat')
+load('t3_positionModel.mat')
+load('trainedModel.mat')
+
 % Initialize Camera
 %clc; clear all; close all;
 close all;
@@ -14,8 +19,6 @@ start(depthVid);
 himg = figure;
 j=0;
 zeros19 = zeros(19, 1);
-%modelType = trainedModel.ClassificationSVM; 
-
 
 % Run Kinect
 while ishandle(himg)
@@ -25,18 +28,18 @@ while ishandle(himg)
     
     if sum(depthMetaData.IsSkeletonTracked) > 0
         % Prep to log data in one line
-        fid = fopen('test.csv', 'w') ;
-        filename = 'testv2.csv';
-        sprintf(filename);
+%         fid = fopen('test.csv', 'w') ;
+%         filename = 'testv2.csv';
+%         sprintf(filename);
         d = depthMetaData;
         [JDI,JII,JTS,JWC,PDI,PII,PWC,SD] = transformData (d);
-        % Log data
-        dlmwrite(filename,[d.AbsTime,d.FrameNumber,...
-            d.IsPositionTracked,d.IsSkeletonTracked,...
-            JDI,JII,JTS,JWC,PDI,PII,PWC,d.RelativeFrame,... %Add Segmentation Data
-            d.SkeletonTrackingID,d.TriggerIndex],'-append','delimiter',',')
-        % Save data
-        fclose(fid)
+%         % Log data
+%         dlmwrite(filename,[d.AbsTime,d.FrameNumber,...
+%             d.IsPositionTracked,d.IsSkeletonTracked,...
+%             JDI,JII,JTS,JWC,PDI,PII,PWC,d.RelativeFrame,... %Add Segmentation Data
+%             d.SkeletonTrackingID,d.TriggerIndex],'-append','delimiter',',')
+%         % Save data
+%         fclose(fid)
         
         % Prep data for plotting
         numberOfPeople = sum(depthMetaData.IsSkeletonTracked)
@@ -49,7 +52,6 @@ while ishandle(himg)
             if depthMetaData.IsSkeletonTracked(j)
                 index = [[index],j];
                 joints = [[joints],depthMetaData.JointDepthIndices(:,:,j)];
-                %SJ = daTr20by2(skeletonJoints(:,:,j));
             end
         end
 %        modelType = courseG_Model.ClassificationSVM; 
@@ -63,26 +65,23 @@ while ishandle(himg)
         
 %        display(predictedPosition(end))
 %        predictedPosition = string(predictedPosition(end))
-       t3_2 = t3_depthModel.ClassificationSVM;      
+       t3_2 = t3_depthModel.ClassificationSVM; 
+       allPlaces = [];
        for i = 1:numberOfPeople
             [predictedPlace,scorePlace] = predict(t3_2, JWC(1,(person(i)-1)*60+1:person(i)*60))
-%             d.JointWorldCoordinates(:,:,person(1)))
             display(predictedPlace(end));
+            predictedPlace = string(predictedPlace(end))
+            allPlaces = [allPlaces,predictedPlace];
        end
-       %predictedPlace = yfit.LABEL()
-       predictedPlace = string(predictedPlace(end))
+       allLabels = [];
+       lineOptions = [":o", ":go", ":ko", ":ro", ":po", ":yo"];
        hold on;
-       for i = 1:numberOfPeople
-           plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),'*');
-       end        
+       for i = 1:numberOfPeople 
+           plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),lineOptions(i));
+            display(allPlaces)
+       end
        hold off;
-%        position = trainedModel.predictFcn([skeletonJoints(3,1,1),skeletonJoints(3,2,1)])
-% 
-%        position = TrainedModel.predictFcn(depthMetaData.JointDepthIndices(3,:,6))
-%        print (position)
-%        aLabel = string(predictedPosition(end))
-       bLabel = sprintf("%s %s",predictedPlace); %,predictedPosition);
-       legend(bLabel);
+       legend(allPlaces);
     end
 end
 
