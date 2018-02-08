@@ -1,7 +1,6 @@
 
 clc; clear all; close all;
-load('WalkStandModel.mat')
-load('Model4.mat')
+load('WaveDetect.mat')
 % load('t3_depthModel.mat')
 % load('t3_positionModel.mat')
 % load('trainedModel.mat')
@@ -21,7 +20,6 @@ himg = figure;
 j=0;
 oldData = 0;
 firstLoop = 1;
-scoreTable = [];
 
 % Run Kinect
 while ishandle(himg)
@@ -66,8 +64,7 @@ while ishandle(himg)
                 joints = [[joints],depthMetaData.JointDepthIndices(:,:,j)];
             end
         end
-       modelType = WalkStandModel.ClassificationTree; 
-       modelType2 = Model4.ClassificationKNN;
+       modelType = WaveDetect.ClassificationTree; 
        person = depthMetaData.IsSkeletonTracked;
        person = find(d.IsSkeletonTracked == 1);
 %        t3_1 = trainedModel.ClassificationSVM;  
@@ -80,25 +77,21 @@ while ishandle(himg)
 %        predictedPosition = string(predictedPosition(end))
 %        t3_2 = t3_depthModel.ClassificationSVM; 
        allPlaces = [];
-       
+       scoreTable = [];
        if (firstLoop ==0)
            for i = 1:numberOfPeople
-               [predictedMotion,scoreMotion] = predict(modelType, VelocityDiff(1,(person(i)-1)*60+1:person(i)*60))
-               display(predictedMotion(end));
-               [predictedWave,scoreWave] = predict(modelType2, VelocityDiff(1,(person(i)-1)*60+1:person(i)*60))
+               [predictedWave,scoreWave] = predict(modelType, VelocityDiff(1,(person(i)-1)*60+1:person(i)*60))
                display(predictedWave(end));
-               predictedWave = char(predictedWave(end));
-               predictedMotion = char(predictedMotion(end));
-               allPlaces = [allPlaces,{predictedWave,predictedMotion}];
-               scoreTable = [scoreTable; scoreWave];
+               predictedWave = char(predictedWave(end))
+               allPlaces = [allPlaces,predictedWave];
+               scoreTable = [scoreTable, scoreWave];
            end
            allLabels = [];
-           lineOptions = [{':go'}, {':mo'},{':ko'}, {':ro'}, {':wo'}, {':yo'}];
+           lineOptions = [{':o'}, {':go'},{':ko'}, {':ro'}, {':po'}, {':yo'}];
            hold on;
            
            for i = 1:numberOfPeople
-               currentSym = char(lineOptions(i));
-               plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),currentSym);
+               plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),'*');
                %             display(allPlaces)
            end
            hold off;
@@ -120,7 +113,7 @@ while ishandle(himg)
 %    %        close figure1;
 %           close (figure(2));
            
-           allPlaces = char(allPlaces)
+           
            legend(allPlaces);
        end
        firstLoop = 0;
