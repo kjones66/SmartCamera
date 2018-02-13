@@ -1,6 +1,6 @@
 
 clc; clear all; close all;
-load('WaveDetect.mat')
+load('WalkStandModel.mat')
 % load('t3_depthModel.mat')
 % load('t3_positionModel.mat')
 % load('trainedModel.mat')
@@ -36,16 +36,16 @@ while ishandle(himg)
         [JDI,JII,JTS,JWC,PDI,PII,PWC,SD] = transformData (d);
         % Log data
         dataLine = JWC;
-%         dlmwrite(filename,dataLine,'-append','delimiter',',')
-%         % Save data
-%         fclose(fid)
+        dlmwrite(filename,dataLine,'-append','delimiter',',')
+        % Save data
+        fclose(fid)
         if (firstLoop == 0)
             VelocityDiff = dataLine - oldData;
-%             fid = fopen('test.csv', 'w') ;
-%             filename = 'trial4_JWCVelocity_noWave.csv';
-%             sprintf(filename);
-%             dlmwrite(filename,VelocityDiff,'-append','delimiter',',');
-%             % Save data
+            fid = fopen('test.csv', 'w') ;
+            filename = 'trialV.csv';
+            sprintf(filename);
+            dlmwrite(filename,VelocityDiff,'-append','delimiter',',');
+            % Save data
             fclose(fid);
         end
 
@@ -64,7 +64,7 @@ while ishandle(himg)
                 joints = [[joints],depthMetaData.JointDepthIndices(:,:,j)];
             end
         end
-       modelType = WaveDetect.ClassificationTree; 
+       modelType = WalkStandModel.ClassificationTree; 
        person = depthMetaData.IsSkeletonTracked;
        person = find(d.IsSkeletonTracked == 1);
 %        t3_1 = trainedModel.ClassificationSVM;  
@@ -80,11 +80,11 @@ while ishandle(himg)
        scoreTable = [];
        if (firstLoop ==0)
            for i = 1:numberOfPeople
-               [predictedWave,scoreWave] = predict(modelType, VelocityDiff(1,(person(i)-1)*60+1:person(i)*60))
-               display(predictedWave(end));
-               predictedWave = char(predictedWave(end))
-               allPlaces = [allPlaces,predictedWave];
-               scoreTable = [scoreTable, scoreWave];
+               [predictedWalk,scoreWalk] = predict(modelType, VelocityDiff(1,(person(i)-1)*60+1:person(i)*60))
+               display(predictedWalk(end));
+               predictedWalk = char(predictedWalk(end))
+               allPlaces = [allPlaces,predictedWalk];
+               scoreTable = [scoreTable, scoreWalk];
            end
            allLabels = [];
            lineOptions = [{':o'}, {':go'},{':ko'}, {':ro'}, {':po'}, {':yo'}];
