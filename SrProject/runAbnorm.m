@@ -1,4 +1,4 @@
-clc; clear all; close all;
+clc; clear; close all;
 %load('AbVwalk_spineankle.mat')
 load('walkRun.mat')
 load('walkJump.mat')
@@ -17,6 +17,11 @@ firstLoop = 1;
 oldData = 0;
 oldDataJWC = 0;
 scoreTable = [];
+scoreWalk  = [];
+scoreStand = [];
+scoreWave = [];
+myTable = cell(300,8);
+row = 0;
 
 % Run Kinect
 while ishandle(himg)
@@ -25,6 +30,7 @@ while ishandle(himg)
     imshow(depthMap, [0 4096]);
     
     if sum(depthMetaData.IsSkeletonTracked) > 0
+        row = row +1;
         d = depthMetaData;
         % Prep to log data in one line
         numberOfPeople = sum(depthMetaData.IsSkeletonTracked);
@@ -41,56 +47,72 @@ while ishandle(himg)
        if (firstLoop ==0)
            for i = 1:numberOfPeople
                modelType = walkJump.ClassificationEnsemble; 
-                [predictedWalkA,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+                [predictedWalkA,scoreWalkA] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                modelType = walkFall.ClassificationEnsemble; 
-               [predictedWalkB,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+               [predictedWalkB,scoreWalkB] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                modelType = walkRun.ClassificationEnsemble; 
-               [predictedWalkC,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+               [predictedWalkC,scoreWalkC] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                predictedWalk = [predictedWalkA(end),predictedWalkB(end),predictedWalkC(end)];
-               display(predictedWalk);
+           %    display(predictedWalk);
+               scoreWalk = [scoreWalk;[scoreWalkA(end),scoreWalkB(end),scoreWalkC(end)]];
                if ((strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkB,'Walk'))...
                        || (strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkC,'Walk'))...
                        || (strcmp(predictedWalkB,'Walk')&&strcmp(predictedWalkC,'Walk')))
                    Walk = char('Walk');
                else 
-                   Walk = char('Abnormal')
+                   Walk = char('Abnormal');
                end
                
                
                modelType = standJump.ClassificationEnsemble; 
-                [predictedStandA,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+                [predictedStandA,scoreStandA] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                modelType = standFall.ClassificationEnsemble; 
-               [predictedStandB,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+               [predictedStandB,scoreStandB] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                modelType = standRun.ClassificationEnsemble; 
-               [predictedStandC,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+               [predictedStandC,scoreStandC] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                predictedStand = [predictedStandA(end),predictedStandB(end),predictedStandC(end)];
-               display(predictedStand);
+               scoreStand = [scoreStand;[scoreStandA(end),scoreStandB(end),scoreStandC(end)]];
+           %    display(predictedStand);
+               
                
                if ((strcmp(predictedStandA,'Stand')&&strcmp(predictedStandB,'Stand'))...
                        || (strcmp(predictedStandA,'Stand')&&strcmp(predictedStandC,'Stand'))...
                        || (strcmp(predictedStandB,'Stand')&&strcmp(predictedStandC,'Stand')))
                    Stand = char('Stand');
                else 
-                   Stand = char('Abnormal')
+                   Stand = char('Abnormal');
                end
                
                
                modelType = waveJump.ClassificationEnsemble; 
-                [predictedWaveA,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+                [predictedWaveA,scoreWaveA] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                modelType = waveFall.ClassificationEnsemble; 
-               [predictedWaveB,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+               [predictedWaveB,scoreWaveB] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                modelType = waveRun.ClassificationKNN; 
-               [predictedWaveC,scoreWalk] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60))
+               [predictedWaveC,scoreWaveC] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
                predictedWave = [predictedWaveA(end),predictedWaveB(end),predictedWaveC(end)];
-               display(predictedWave);
+               scoreWave = [scoreWave;[scoreWaveA,scoreWaveB,scoreWaveC]];
+            %   display(predictedWave);
                
                if ((strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveB,'Wave'))...
                        || (strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveC,'Wave'))...
                        || (strcmp(predictedWaveB,'Wave')&&strcmp(predictedWaveC,'Wave')))
                    Wave = char('Wave');
+                   if strcmp(Stand,'Stand')
+                       other = 'Stand/Wave';
+                   else 
+                       other = 'Wave';
+                   end
                else 
-                   Wave = char('Abnormal')
+                   Wave = char('Abnormal');
+                   if strcmp(Stand,'Stand')
+                       other = 'Stand';
+                   else 
+                       other = 'Abnormal';
+                   end
                end
+               
+               myTable(row,:) = [Walk,predictedWalkA,scoreWalkA(end),predictedWalkB,scoreWalkB(end),predictedWalkC,scoreWalkC(end),other];
                
 %                predictedWalk = char(predictedWalk(end));
 %                allPlaces = [allPlaces,{predictedWalk}]; 
@@ -109,11 +131,11 @@ while ishandle(himg)
 %                    VelocityDiffJWC(1,[(person(i)-1)*60+55:(person(i)-1)*60+60]))
                
               % display(predictedNorm(end));
-               predictedWalk = char(predictedWalk);
-               predictedStand = char(predictedStand);
-               predictedWave = char(predictedWave);
+%                predictedWalk = char(predictedWalk);
+%                predictedStand = char(predictedStand);
+%                predictedWave = char(predictedWave);
                allPlaces = [allPlaces,{Walk,Stand,Wave}]; 
-              % scoreTable = [scoreTable; scoreNorm];
+               scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end),scoreWave(end)]];
            end
            allLabels = [];
            lineOptions = [{':o'}, {':go'},{':ko'}, {':ro'}, {':po'}, {':yo'}];
@@ -123,11 +145,12 @@ while ishandle(himg)
                plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),currentSym);
            end
            hold off;
-           allPlaces = char(allPlaces)
+           allPlaces = char(allPlaces);
            lgd = legend(allPlaces);
            lgd.FontSize = 20;
-           set(gcf,'units','normalized','outerposition',[0 0 1 1])
+%            set(gcf,'units','normalized','outerposition',[0 0 1 1])
        end
        firstLoop = 0;
+     %  scoreTable
     end
 end
