@@ -47,12 +47,13 @@ while ishandle(himg)
       allPlaces = [];
        if (firstLoop ==0)
            for i = 1:numberOfPeople
+               thisJWC = VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60)
                modelType = walkJump.ClassificationEnsemble; 
-                [predictedWalkA,scoreWalkA] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+                [predictedWalkA,scoreWalkA] = predict(modelType, thisJWC);
                modelType = walkFall.ClassificationEnsemble; 
-               [predictedWalkB,scoreWalkB] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+               [predictedWalkB,scoreWalkB] = predict(modelType, thisJWC);
                modelType = walkRun.ClassificationEnsemble; 
-               [predictedWalkC,scoreWalkC] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+               [predictedWalkC,scoreWalkC] = predict(modelType, thisJWC);
                predictedWalk = [predictedWalkA(end),predictedWalkB(end),predictedWalkC(end)];
                
                
@@ -61,37 +62,40 @@ while ishandle(himg)
                
                
                modelType = standJump.ClassificationEnsemble; 
-                [predictedStandA,scoreStandA] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+                [predictedStandA,scoreStandA] = predict(modelType, thisJWC);
                modelType = standFall.ClassificationEnsemble; 
-               [predictedStandB,scoreStandB] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+               [predictedStandB,scoreStandB] = predict(modelType, thisJWC);
                modelType = standRun.ClassificationEnsemble; 
-               [predictedStandC,scoreStandC] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+               [predictedStandC,scoreStandC] = predict(modelType, thisJWC);
                predictedStand = [predictedStandA(end),predictedStandB(end),predictedStandC(end)];
                scoreStand = [scoreStand;[scoreStandA(end),scoreStandB(end),scoreStandC(end)]];
            %    display(predictedStand);
                
-               stage2S_Data = [VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60),predictedWalk];
+%                A = [VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60),predictedWalk];
+%                stage2S_Data = array2table(A);
+                now = person(i);
+               stage2S_Data = label4Stage2(thisJWC, predictedStand)
                modelType = stage2Stand.ClassificationSVM; 
                [predictedStage2Stand,scoreStage2Stand] = predict(modelType, stage2S_Data);
 
                
                
-               modelType = waveJump.ClassificationEnsemble; 
-                [predictedWaveA,scoreWaveA] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
-               modelType = waveFall.ClassificationEnsemble; 
-               [predictedWaveB,scoreWaveB] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
-               modelType = waveRun.ClassificationKNN; 
-               [predictedWaveC,scoreWaveC] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
-               predictedWave = [predictedWaveA(end),predictedWaveB(end),predictedWaveC(end)];
-               scoreWave = [scoreWave;[scoreWaveA,scoreWaveB,scoreWaveC]];
-            %   display(predictedWave);
+%                modelType = waveJump.ClassificationEnsemble; 
+%                 [predictedWaveA,scoreWaveA] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+%                modelType = waveFall.ClassificationEnsemble; 
+%                [predictedWaveB,scoreWaveB] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+%                modelType = waveRun.ClassificationKNN; 
+%                [predictedWaveC,scoreWaveC] = predict(modelType, VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+%                predictedWave = [predictedWaveA(end),predictedWaveB(end),predictedWaveC(end)];
+%                scoreWave = [scoreWave;[scoreWaveA,scoreWaveB,scoreWaveC]];
+%             %   display(predictedWave);
+%               
+%                
+%                myTable(row,:) = [Wave,predictedWaveA,scoreWaveA(end),predictedWaveB,scoreWaveB(end),predictedWaveC,scoreWaveC(end),other];
               
+               allPlaces = {'Stand vs Abnormal: ' char(predictedStage2Stand)};%'Walk vs Abnormal: ' Walk, 'Wave vs Abnormal: ' Wave}; 
                
-               myTable(row,:) = [Wave,predictedWaveA,scoreWaveA(end),predictedWaveB,scoreWaveB(end),predictedWaveC,scoreWaveC(end),other];
-              
-               allPlaces = {'Walk vs Abnormal: ' Walk, 'Stand vs Abnormal: ' Stand,'Wave vs Abnormal: ' Wave}; 
-               
-               scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end),scoreWave(end)]];
+               scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end)]];%,scoreWave(end)]];
            end
            allLabels = [];
            lineOptions = [{':o'}, {':go'},{':ko'}, {':ro'}, {':po'}, {':yo'}];
