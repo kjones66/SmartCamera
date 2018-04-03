@@ -12,6 +12,10 @@ load('waveFall.mat')
 %load('st23SVM.mat')
 load('st23predictnoConfidence.mat')
 
+load('hmm_data_matrix_anyWalk.mat')
+TRGUESS = [[.85],[.15];[.4],[.6]];
+EMITGUESS = [[.4],[.45],[.05];[.05],[.05],[.9]];
+[ESTTR,ESTEMIT] = hmmtrain(s,TRGUESS,EMITGUESS);
 
 % Initialize Camera
 [vid, depthVid, himg, src] = InitializeKinect();
@@ -27,14 +31,18 @@ scoreStand = [];
 scoreWave = [];
 myTable = cell(300,8);
 row = 0;
+loop = 0;
+last3 = [];
 
 % Run Kinect
 while ishandle(himg)
     trigger(depthVid);
     [depthMap, ~, depthMetaData] = getdata(depthVid);
     imshow(depthMap, [0 4096]);
+
     
     if sum(depthMetaData.IsSkeletonTracked) > 0
+        loop = loop+1;
         row = row +1;
         d = depthMetaData;
         % Prep to log data in one line
@@ -93,9 +101,9 @@ while ishandle(himg)
                        || (strcmp(predictedWaveB,'Wave')&&strcmp(predictedWaveC,'Wave'))))
                    state = 'Stand/Wave';
                    stateKey = 1;
-               elseif ((strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkB,'Walk'))...
-                       ||(strcmp(predictedWalkB,'Walk')&&strcmp(predictedWalkC,'Walk'))...
-                       ||(strcmp(predictedWalkC,'Walk')&&strcmp(predictedWalkA,'Walk')))
+               elseif (strcmp(predictedWalkA,'Walk')...
+                       ||strcmp(predictedWalkB,'Walk')...
+                       ||strcmp(predictedWalkC,'Walk'))
                    state = 'Walk';
                    stateKey = 2;
                else 
@@ -104,23 +112,21 @@ while ishandle(himg)
                end
                
                fid = fopen('test.csv', 'w') ;
-               filename = sprintf('JWC_hmm_labels.csv');
+               filename = sprintf('JWC_hmm_labels_anyWalk.csv');
                dataLine = [thisJWC,stateKey];
                dlmwrite(filename,dataLine,'-append','delimiter',',')
                fclose(fid)
-               
-               
-%                Var = [0,0,predictedStand,predictedWalk, predictedWave];
-%                C = cell2table(Var);
-%                thisModel = st23predictnoConfidence.ClassificationEnsemble; 
-%                [prediction,scoreOut] = predict(thisModel,C(1,3:11));
+               if (loop > 3)
+                   last3 = [last3,stateKey];
+                   last3 = last3(1,2:4);
+                   STATES = hmmviterbi(last3,ESTTR,ESTEMIT);
+               elseif (loop <= 3)
+                   last3 = [last3,stateKey];
+                   STATES = hmmviterbi(last3,ESTTR,ESTEMIT);
+               end
+                   
+                   
 
-              
-%                if (strcmp(Walk,'Abnormal')&&strcmp(Stand,'Abnormal')&&strcmp(Wave,'Abnormal'))
-%                    allPlaces = {'Abnormal'}; 
-%                else
-%                    allPlaces = {'Normal'}; 
-%                end
                allPlaces = {char(state)};
                scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end),scoreWave(end)]];
            end
