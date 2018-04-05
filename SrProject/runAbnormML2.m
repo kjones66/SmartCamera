@@ -12,10 +12,14 @@ load('waveFall.mat')
 %load('st23SVM.mat')
 load('st23predictnoConfidence.mat')
 
+load('hmm_data_matrix.mat')
+any2W = s;
 load('hmm_data_matrix_anyWalk.mat')
+anyW = s;
 TRGUESS = [[.85],[.15];[.4],[.6]];
 EMITGUESS = [[.4],[.45],[.05];[.05],[.05],[.9]];
-[ESTTR,ESTEMIT] = hmmtrain(s,TRGUESS,EMITGUESS);
+[ESTTR_2W,ESTEMIT_2W] = hmmtrain(any2W,TRGUESS,EMITGUESS);
+[ESTTR_anyW,ESTEMIT_anyW] = hmmtrain(anyW,TRGUESS,EMITGUESS);
 
 % Initialize Camera
 [vid, depthVid, himg, src] = InitializeKinect();
@@ -33,6 +37,7 @@ myTable = cell(300,8);
 row = 0;
 loop = 0;
 last3 = [];
+last3Name = [];
 
 % Run Kinect
 while ishandle(himg)
@@ -116,18 +121,30 @@ while ishandle(himg)
                dataLine = [thisJWC,stateKey];
                dlmwrite(filename,dataLine,'-append','delimiter',',')
                fclose(fid)
-               if (loop > 3)
+               if (loop > 4)
                    last3 = [last3,stateKey];
                    last3 = last3(1,2:4);
-                   STATES = hmmviterbi(last3,ESTTR,ESTEMIT);
-               elseif (loop <= 3)
+                   last3Name = [last3Name,state];
+                   last3Name = last3Name(1,2:4);
+                   STATES = hmmviterbi(last3,ESTTR_2W,ESTEMIT_2W);
+                   STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
+               elseif (loop <= 4)
                    last3 = [last3,stateKey];
-                   STATES = hmmviterbi(last3,ESTTR,ESTEMIT);
+                   last3Name = [last3Name,state];
+                   STATES = hmmviterbi(last3,ESTTR_2W,ESTEMIT_2W);
+                   STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
                end
-                   
-                   
-
-               allPlaces = {char(state)};
+               
+               if (ismember(2,STATES_anyW))
+                   if (ismember(2,STATES))
+                       report = 'Abnormal'
+                   end
+               else
+                   report = 'Normal'
+               end
+               display (report)
+               
+               allPlaces = {char(last3Name),char(num2str(STATES)),char(num2str(STATES_anyW)),char(report)};
                scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end),scoreWave(end)]];
            end
            allLabels = [];
