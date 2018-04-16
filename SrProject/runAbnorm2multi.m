@@ -16,11 +16,11 @@ oldDataJWC = 0;
 myTable = cell(300,8);
 row = 0;
 % for i = 1:6               
-    ThisPerson = personClass(i,ESTTR_2W,ESTEMIT_2W,ESTTR_anyW,ESTEMIT_anyW);
+ %   ThisPerson = personClass(1,ESTTR_2W,ESTEMIT_2W,ESTTR_anyW,ESTEMIT_anyW);
 %  end
-%  for i = 1:6               
-%     ThisPerson(i) = personClass(i,ESTTR_2W,ESTEMIT_2W,ESTTR_anyW,ESTEMIT_anyW);
-%  end
+  for i = 1:6               
+     ThisPerson(i) = personClass(i,ESTTR_2W,ESTEMIT_2W,ESTTR_anyW,ESTEMIT_anyW);
+  end
 
 % Run Kinect
 while ishandle(himg)
@@ -39,15 +39,21 @@ while ishandle(himg)
        skeletonJoints = depthMetaData.JointDepthIndices(:,:,depthMetaData.IsSkeletonTracked);
        allPlaces = [];
        if (firstLoop ==0)
-           for i = 1:numberOfPeople               
+            for i = 1:numberOfPeople               
                %ThisPerson(i) = personClass(i,ESTTR_2W,ESTEMIT_2W,ESTTR_anyW,ESTEMIT_anyW);
-               ThisPerson.JWC_V = VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60);
-               ThisPerson.getBehavior()
+             %  ThisPerson.JWC_V = VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60);
+
+               
+               ThisPerson(i).getBehavior(VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
+
+
+               %ThisPerson.JWC_V = VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60);
+               %ThisPerson.getBehavior()
              
-               if (ThisPerson.reportnum == 2)
+%                if (ThisPerson.reportnum == 2)
 %                        send_text_message('925-337-5087','Verizon', 'Smart Camera: Security Alert!')
 %                        sendmail('aweber13@lion.lmu.edu','Smart Security System: Alert!','Smart Security System: Alert!')
-               end
+%                end
                
 %                fid = fopen('test.csv', 'w') ;
                %filename = sprintf('JWC_hmm_labels_Walk_Mohammed.csv');
@@ -56,9 +62,10 @@ while ishandle(himg)
 %                dlmwrite(filename,dataLine,'-append','delimiter',',')
 %                fclose(fid)
                
-               allPlaces = [allPlaces,ThisPerson.label];
+                allPlaces = [allPlaces,ThisPerson(i).label];
+            end
             %   scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end),scoreWave(end)]];
-           end
+%            end
            allLabels = [];
            lineOptions = [{':o'}, {':go'},{':ko'}, {':ro'}, {':po'}, {':yo'}];
            hold on;

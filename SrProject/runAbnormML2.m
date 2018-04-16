@@ -6,14 +6,17 @@ load('walkFall.mat')
 load('standRun.mat')
 load('standJump.mat')
 load('standFall.mat')
-load('WaveRun2.mat')
-load('WaveJump2.mat')
-load('WaveFall2.mat')
+load('waveRun.mat')
+load('waveJump.mat')
+load('waveFall.mat')
 load('newWalkRun.mat')
+load('WavLeftR.mat')
+load('WavLeftF.mat')
+load('WavLeftJ.mat')
 %load('st23SVM.mat')
 load('st23predictnoConfidence.mat')
-load('WaveStand2.mat')
-load('WaveWalk2.mat')
+% load('WaveStand2.mat')
+% load('WaveWalk2.mat')
 % load('hmm_data_matrix.mat')
 % any2W = s;
  load('new_hmm_training_data.mat')
@@ -92,17 +95,19 @@ while ishandle(himg)
                scoreStand = [scoreStand;[scoreStandA(end),scoreStandB(end),scoreStandC(end)]];
                
                                     
-               modelType = WaveJump2.ClassificationSVM; 
-                [predictedWaveA,scoreWaveA] = predict(modelType, thisJWC(13:36));
-               modelType = WaveFall2.ClassificationEnsemble; 
-               [predictedWaveB,scoreWaveB] = predict(modelType, thisJWC(13:36));
-               modelType = WaveRun2.ClassificationEnsemble; 
-               [predictedWaveC,scoreWaveC] = predict(modelType, thisJWC(13:36));
+               modelType = waveJump.ClassificationEnsemble; 
+                [predictedWaveA,scoreWaveA] = predict(modelType, thisJWC);
+               modelType = waveFall.ClassificationEnsemble; 
+               [predictedWaveB,scoreWaveB] = predict(modelType, thisJWC);
+               modelType = waveRun.ClassificationKNN; 
+               [predictedWaveC,scoreWaveC] = predict(modelType, thisJWC);
                
-                modelType = WaveStand2.ClassificationEnsemble; 
-               [predictedWaveD,scoreWaveD] = predict(modelType, thisJWC(13:36));
-               modelType = WaveWalk2.ClassificationEnsemble; 
-               [predictedWaveE,scoreWaveE] = predict(modelType, thisJWC(13:36));
+                modelType = WavLeftR.ClassificationEnsemble; 
+               [predictedWaveD,scoreWaveD] = predict(modelType, thisJWC);
+               modelType = WavLeftF.ClassificationKNN; 
+               [predictedWaveE,scoreWaveE] = predict(modelType, thisJWC);
+               modelType = WavLeftJ.ClassificationSVM; 
+               [predictedWaveF,scoreWaveF] = predict(modelType, thisJWC);
                
                predictedWave = [predictedWaveA(end),predictedWaveB(end),predictedWaveC(end),predictedWaveD(end),predictedWaveE(end)];
                scoreWave = [scoreWave;[scoreWaveA,scoreWaveB,scoreWaveC]];
@@ -117,16 +122,12 @@ while ishandle(himg)
                         stateKey2 = 1;
 
 
-               elseif((strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveB,'Wave'))...
+               elseif(((strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveB,'Wave'))...
                        || (strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveC,'Wave'))...
-                       || (strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveD,'Wave'))...
-                       || (strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveE,'Wave'))...
-                       || (strcmp(predictedWaveB,'Wave')&&strcmp(predictedWaveC,'Wave'))...
-                       || (strcmp(predictedWaveB,'Wave')&&strcmp(predictedWaveD,'Wave'))...
-                       || (strcmp(predictedWaveB,'Wave')&&strcmp(predictedWaveE,'Wave'))...
-                       || (strcmp(predictedWaveC,'Wave')&&strcmp(predictedWaveD,'Wave'))...
-                       || (strcmp(predictedWaveC,'Wave')&&strcmp(predictedWaveE,'Wave'))...
-                       || (strcmp(predictedWaveD,'Wave')&&strcmp(predictedWaveE,'Wave')))
+                       || (strcmp(predictedWaveB,'Wave')&&strcmp(predictedWaveC,'Wave')))...
+                       || ((strcmp(predictedWaveD,'Wave')&&strcmp(predictedWaveE,'Wave'))...
+                       || (strcmp(predictedWaveD,'Wave')&&strcmp(predictedWaveF,'Wave'))...
+                       || (strcmp(predictedWaveE,'Wave')&&strcmp(predictedWaveF,'Wave'))))
                    Move = 'Wave';
                    stateKey = 1;
                    stateKey2 = 1;
@@ -160,22 +161,22 @@ while ishandle(himg)
 %                    stateKey = 3;
 %                end
 %                
-               if (loop > 4)
-%                    last3 = [last3,stateKey];
-%                    last3 = last3(1,2:4);
-%                    last3Name = [last3Name,state];
-%                    last3Name = last3Name(1,2:4);
-                   STATES = hmmviterbi(transpose(stateList(end-4:end,1)),ESTTR,ESTEMIT);
-                   STATES2 = hmmviterbi(transpose(stateList2(end-4:end,1)),ESTTR2,ESTEMIT2);
-                   %STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
-               elseif (loop <= 4)
-%                    last3 = [last3,stateKey];
-%                    last3Name = [last3Name,state];
-%                    STATES = hmmviterbi(last3,ESTTR_2W,ESTEMIT_2W);
-%                    STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
-                    STATES = hmmviterbi(transpose(stateList(end,1)),ESTTR,ESTEMIT);
-                    STATES2 = hmmviterbi(transpose(stateList2(end,1)),ESTTR2,ESTEMIT2);
-               end
+%                if (loop > 4)
+% %                    last3 = [last3,stateKey];
+% %                    last3 = last3(1,2:4);
+% %                    last3Name = [last3Name,state];
+% %                    last3Name = last3Name(1,2:4);
+%                    STATES = hmmviterbi(transpose(stateList(end-4:end,1)),ESTTR,ESTEMIT);
+%                    STATES2 = hmmviterbi(transpose(stateList2(end-4:end,1)),ESTTR2,ESTEMIT2);
+%                    %STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
+%                elseif (loop <= 4)
+% %                    last3 = [last3,stateKey];
+% %                    last3Name = [last3Name,state];
+% %                    STATES = hmmviterbi(last3,ESTTR_2W,ESTEMIT_2W);
+% %                    STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
+%                     STATES = hmmviterbi(transpose(stateList(end,1)),ESTTR,ESTEMIT);
+%                     STATES2 = hmmviterbi(transpose(stateList2(end,1)),ESTTR2,ESTEMIT2);
+%                end
 %                
 %                if (ismember(2,STATES_anyW))
 %                    if (ismember(2,STATES))
@@ -214,10 +215,10 @@ while ishandle(himg)
                plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),currentSym);
            end
            hold off;
-           display('STATES: ')
-           display(STATES2)
-%            allPlaces = {char(STATES)};
-%            lgd = legend(allPlaces);
+%            display('STATES: ')
+%            display(STATES2)
+           allPlaces = {char(Move)};
+           lgd = legend(allPlaces);
            lgd.FontSize = 20;
 %            set(gcf,'units','normalized','outerposition',[0 0 1 1])
        end
