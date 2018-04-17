@@ -153,23 +153,25 @@ while ishandle(himg)
                        Move = 'Walk';
                        stateKey_2W = 2;
                        stateKey2_2W = 2;
-                   elseif (strcmp(predictedWalkA,'Walk')||strcmp(predictedWalkB,'Walk')...
+                   end
+                   if (strcmp(predictedWalkA,'Walk')||strcmp(predictedWalkB,'Walk')...
                            ||strcmp(predictedWalkC,'Walk'))
                    %    Move = 'Walk';
                        stateKey = 2;
                        stateKey2 = 2;
                    end
+               end
                 
                stateList = [stateList;stateKey];
                stateList2 = [stateList2;stateKey2];
                stateList_2W = [stateList_2W;stateKey_2W];
                stateList2_2W = [stateList2_2W;stateKey2_2W];
 
-               fid = fopen('test.csv', 'w') ;
-               filename = sprintf('JWC_hmm_data_4versions.csv');
-               dataLine = [thisJWC,stateKey,stateKey2,stateKey_2W,stateKey2_2W];
-               dlmwrite(filename,dataLine,'-append','delimiter',',')
-               fclose(fid)
+%                fid = fopen('test.csv', 'w') ;
+%                filename = sprintf('JWC_hmm_data_4versions.csv');
+%                dataLine = [thisJWC,stateKey,stateKey2,stateKey_2W,stateKey2_2W];
+%                dlmwrite(filename,dataLine,'-append','delimiter',',')
+%                fclose(fid)
                
 %                
 %                if (loop > 4)

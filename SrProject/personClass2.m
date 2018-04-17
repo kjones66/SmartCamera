@@ -1,22 +1,31 @@
-classdef personClass < handle
+classdef personClass2 < handle
     properties
         JWC_V
         last3
         last3Names
-        last3_2
-        last3Names
+%         last3_2
+%         last3Names
         STATES
         STATES2
+        STATES_2W
+        STATES2_2W
         ID
         ESTTR
         ESTEMIT
         ESTTR2
         ESTEMIT2
+        ESTTR_2W
+        ESTEMIT_2W
+        ESTTR2_2W
+        ESTEMIT2_2W
         predictedWalk
         predictedStand
         predictedWave
         behave
         behaveKey
+        behaveKey2
+        behaveKey_2W
+        behaveKey2_2W
         report
         scoreWalk
         scoreStand
@@ -37,16 +46,28 @@ classdef personClass < handle
         WavLeftR
         WavLeftF
         WavLeftJ
+        stateList
+        stateList2
+        stateList_2W 
+        stateList2_2W
     end
     methods
-        function obj = personClass(i,ESTTR,ESTEMIT,ESTTR2,ESTEMIT2)
+        function obj = personClass2(i,ESTTR,ESTEMIT,ESTTR2,ESTEMIT2,ESTTR_2W,ESTEMIT_2W,ESTTR2_2W,ESTEMIT2_2W)
             obj.ID = i;
             obj.last3 = [];
             obj.last3Names = [];
+            obj.stateList = [];
+            obj.stateList2 = [];
+            obj.stateList_2W = [];
+            obj.stateList2_2W = [];
             obj.ESTTR = ESTTR;
             obj.ESTEMIT = ESTEMIT;
             obj.ESTTR2 = ESTTR2;
             obj.ESTEMIT2 = ESTEMIT2;
+            obj.ESTTR_2W = ESTTR_2W;
+            obj.ESTEMIT_2W = ESTEMIT_2W;
+            obj.ESTTR2_2W = ESTTR2_2W;
+            obj.ESTEMIT2_2W = ESTEMIT2_2W;
             obj.scoreWalk = [];
             obj.scoreStand = [];
             obj.scoreWave = [];
@@ -110,58 +131,75 @@ classdef personClass < handle
             obj.scoreWave = [obj.scoreWave;[scoreWaveA,scoreWaveB,scoreWaveC]];
             
             modelType = obj.WavLeftR.ClassificationEnsemble;
-            [predictedWaveD,scoreWaveD] = predict(modelType, thisJWC);
+            [predictedWaveD,scoreWaveD] = predict(modelType, obj.JWC_V);
             modelType = obj.WavLeftF.ClassificationKNN;
-            [predictedWaveE,scoreWaveE] = predict(modelType, thisJWC);
+            [predictedWaveE,scoreWaveE] = predict(modelType, obj.JWC_V);
             modelType = obj.WavLeftJ.ClassificationSVM;
-            [predictedWaveF,scoreWaveF] = predict(modelType, thisJWC);
+            [predictedWaveF,scoreWaveF] = predict(modelType, obj.JWC_V);
             
-             if ((strcmp(predictedStandA,'Stand')&&strcmp(predictedStandB,'Stand'))...
-                       || (strcmp(predictedStandA,'Stand')&&strcmp(predictedStandC,'Stand'))...
-                       || (strcmp(predictedStandB,'Stand')&&strcmp(predictedStandC,'Stand')))
-                   obj.behave = 'Stand';
-                   obj.behaveKey = 3;
-                   obj.behaveKey2 = 1;
-             elseif(((strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveB,'Wave'))...
+            if(((strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveB,'Wave'))...
                        || (strcmp(predictedWaveA,'Wave')&&strcmp(predictedWaveC,'Wave'))...
                        || (strcmp(predictedWaveB,'Wave')&&strcmp(predictedWaveC,'Wave')))...
                        || ((strcmp(predictedWaveD,'Wave')&&strcmp(predictedWaveE,'Wave'))...
                        || (strcmp(predictedWaveD,'Wave')&&strcmp(predictedWaveF,'Wave'))...
-                       || (strcmp(predictedWaveE,'Wave')&&strcmp(predictedWaveF,'Wave'))))      
-                 obj.behave = 'Wave';
-                 obj.behaveKey = 1;
-                 obj.behaveKey2 = 1;  
-            elseif ((strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkB,'Walk'))...
-                       || (strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkC,'Walk'))...
-                       || (strcmp(predictedWalkB,'Walk')&&strcmp(predictedWalkC,'Walk')))
-                obj.behave = 'Walk';
-                obj.behaveKey = 2;
-                obj.behaveKey = 2;
-            else
-                obj.behave = 'Abnormal';
-                obj.behaveKey = 4;
-                obj.behaveKey2 = 3;
-             end
-            
+                       || (strcmp(predictedWaveE,'Wave')&&strcmp(predictedWaveF,'Wave'))))
+                   obj.behave = 'Wave';
+                   obj.behaveKey = 1;
+                   obj.behaveKey2 = 1;
+                   obj.behaveKey_2W = 1;
+                   obj.behaveKey2_2W = 1;
+               elseif ((strcmp(predictedStandA,'Stand')&&strcmp(predictedStandB,'Stand'))...
+                       || (strcmp(predictedStandA,'Stand')&&strcmp(predictedStandC,'Stand'))...
+                       || (strcmp(predictedStandB,'Stand')&&strcmp(predictedStandC,'Stand')))
+                        obj.behave = 'Stand';
+                        obj.behaveKey = 3;
+                        obj.behaveKey2 = 1;
+                        obj.behaveKey_2W = 3;
+                        obj.behaveKey2_2W = 1;
+               else
+                        obj.behave = 'Abnormal';
+                        obj.behaveKey = 4;
+                        obj.behaveKey2 = 3;
+                        obj.behaveKey_2W = 4;
+                        obj.behaveKey2_2W = 3;
+               end
+               
+               if strcmp(obj.behave,'Abnormal')
+                   if ((strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkB,'Walk'))...
+                           || (strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkC,'Walk'))...
+                           || (strcmp(predictedWalkB,'Walk')&&strcmp(predictedWalkC,'Walk')))
+                       obj.behave = 'Walk';
+                       obj.behaveKey_2W = 2;
+                       obj.behaveKey2_2W = 2;
+                   end
+                   if (strcmp(predictedWalkA,'Walk')||strcmp(predictedWalkB,'Walk')...
+                           ||strcmp(predictedWalkC,'Walk'))
+                   %    obj.behave = 'Walk';
+                       obj.behaveKey = 2;
+                       obj.behaveKey2 = 2;
+                   end
+               end
+                
+               obj.stateList = [obj.stateList;obj.behaveKey];
+               obj.stateList2 = [obj.stateList2;obj.behaveKey2];
+               obj.stateList_2W = [obj.stateList_2W;obj.behaveKey_2W];
+               obj.stateList2_2W = [obj.stateList2_2W;obj.behaveKey2_2W];
             
             display('Adding hmm')
-            if (length(obj.last3)< 1)
-                obj.last3 = [obj.behaveKey];
-                obj.STATES = hmmviterbi(obj.last3,obj.ESTTR,obj.ESTEMIT);
-                obj.last3_2 = [obj.behaveKey2];
-                obj.STATES2 = hmmviterbi(obj.last3,obj.ESTTR2,obj.ESTEMIT2);
-            elseif (length(obj.last3)< 3)
-                obj.last3(1,(length(obj.last3)+1)) = [obj.behaveKey];
-                obj.last3_2(1,(length(obj.last3_2)+1)) = [obj.behaveKey2];
-                obj.STATES = hmmviterbi(obj.last3,obj.ESTTR,obj.ESTEMIT);
-                obj.STATES2 = hmmviterbi(obj.last3,obj.ESTTR2,obj.ESTEMIT2);
+            if (length(obj.stateList)> 4)
+                obj.STATES = hmmviterbi(transpose(obj.stateList(end-4:end,1)),obj.ESTTR,obj.ESTEMIT);
+                obj.STATES2 = hmmviterbi(transpose(obj.stateList2(end-4:end,1)),obj.ESTTR2,obj.ESTEMIT2);
+                obj.STATES_2W = hmmviterbi(transpose(obj.stateList_2W(end-4:end,1)),obj.ESTTR_2W,obj.ESTEMIT_2W);
+                obj.STATES2_2W = hmmviterbi(transpose(obj.stateList2_2W(end-4:end,1)),obj.ESTTR2_2W,obj.ESTEMIT2_2W);
+                %obj.label = strcat(char(num2str(obj.stateList(end-4:end,1))),char(num2str(obj.stateList_2W(end-4:end,1))),char(num2str(obj.stateList2(end-4:end,1))),char(num2str(obj.stateList2_2W(end-4:end,1))));%,char(obj.reportName)); %cell?
+
             else
-                obj.last3 = [obj.last
-                    
-                3(1,2:3),obj.behaveKey];
-                obj.STATES = hmmviterbi(obj.last3,obj.ESTTR,obj.ESTEMIT);
-                obj.last3_2 = [obj.last3_2(1,2:3),obj.behaveKey2];
-                obj.STATES2 = hmmviterbi(obj.last3,obj.ESTTR2,obj.ESTEMIT2);
+                obj.STATES = hmmviterbi(transpose(obj.stateList),obj.ESTTR,obj.ESTEMIT);
+                obj.STATES2 = hmmviterbi(transpose(obj.stateList2),obj.ESTTR2,obj.ESTEMIT2);
+                obj.STATES_2W = hmmviterbi(transpose(obj.stateList_2W),obj.ESTTR_2W,obj.ESTEMIT_2W);
+                obj.STATES2_2W = hmmviterbi(transpose(obj.stateList2_2W),obj.ESTTR2_2W,obj.ESTEMIT2_2W);
+                %obj.label = strcat(char(num2str(obj.stateList)),char(num2str(obj.stateList_2W)),char(num2str(obj.stateList2)),char(num2str(obj.stateList2_2W)));%,char(obj.reportName)); %cell?
+
             end
 %             if (ismember(2,obj.STATES_anyW))
 %                 if (ismember(2,obj.STATES))
@@ -182,8 +220,9 @@ classdef personClass < handle
                 obj.reportnum = 1;
             end
 
-            obj.label = char(obj.reportName);
-            %obj.label = strcat(char(obj.last3),char(num2str(obj.STATES)),char(num2str(obj.STATES_anyW)),char(obj.reportName)); %cell?
+            %obj.label = char(obj.reportName);
+            obj.label = strcat(char(num2str(transpose(obj.STATES))),char(num2str(transpose(obj.STATES_2W))),char(num2str(transpose(obj.STATES2))),char(num2str(transpose(obj.STATES2_2W)))); %cell?
+            %obj.label = strcat(char(num2str(obj.stateList(end-4:end,1))),char(num2str(obj.stateList_2W(end-4:end,1))),char(num2str(obj.stateList2(end-4:end,1))),char(num2str(obj.stateList2_2W(end-4:end,1))));%,char(obj.reportName)); %cell?
             %obj.label = char(obj.label);
 
             

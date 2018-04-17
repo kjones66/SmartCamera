@@ -3,15 +3,18 @@ clc; clear; close all;
 % any2W = s;
 % load('hmm_data_matrix_anyWalk.mat')
 % anyW = s;
-load('new_hmm_training_data.mat')
-load('new_hmm_training_data_2state.mat')
+% load('new_hmm_training_data.mat')
+% load('new_hmm_training_data_2state.mat')
+data = load('JWC_hmm_data_4versions.csv');
 % TRGUESS = [[.85],[.15];[.4],[.6]];
 % EMITGUESS = [[.4],[.45],[.05];[.05],[.05],[.9]];
 TRGUESS = [[.85],[.15];[.4],[.6]];
 EMITGUESS2 = [[.4],[.45],[.05];[.05],[.05],[.9]];
 EMITGUESS = [[.33],[.30],[.32],[.05];[.03],[.04],[.03],[.9]];
-[ESTTR,ESTEMIT] = hmmtrain(new_hmm_training_data,TRGUESS,EMITGUESS);
-[ESTTR2,ESTEMIT2] = hmmtrain(new_hmm_training_data_2state,TRGUESS,EMITGUESS2);
+[ESTTR,ESTEMIT] = hmmtrain(data(:,61),TRGUESS,EMITGUESS);
+[ESTTR2,ESTEMIT2] = hmmtrain(data(:,62),TRGUESS,EMITGUESS2);
+[ESTTR_2W,ESTEMIT_2W] = hmmtrain(data(:,63),TRGUESS,EMITGUESS);
+[ESTTR2_2W,ESTEMIT2_2W] = hmmtrain(data(:,64),TRGUESS,EMITGUESS2);
 
 % Initialize Camera
 [vid, depthVid, himg, src] = InitializeKinect();
@@ -21,7 +24,7 @@ oldDataJWC = 0;
 myTable = cell(300,8);
 row = 0;
   for i = 1:6               
-     ThisPerson(i) = personClass(i,ESTTR,ESTEMIT,ESTTR2,ESTEMIT2);
+     ThisPerson(i) = personClass2(i,ESTTR,ESTEMIT,ESTTR2,ESTEMIT2,ESTTR_2W,ESTEMIT_2W,ESTTR2_2W,ESTEMIT2_2W);
   end
 
 % Run Kinect
