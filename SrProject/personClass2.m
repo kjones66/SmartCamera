@@ -201,27 +201,24 @@ classdef personClass2 < handle
                 %obj.label = strcat(char(num2str(obj.stateList)),char(num2str(obj.stateList_2W)),char(num2str(obj.stateList2)),char(num2str(obj.stateList2_2W)));%,char(obj.reportName)); %cell?
 
             end
-%             if (ismember(2,obj.STATES_anyW))
-%                 if (ismember(2,obj.STATES))
-%                     obj.reportName = 'Abnormal';
-%                     obj.reportnum = 2;
-%                 end
-%             else
-%                 obj.reportName = 'Normal';
-%                 obj.reportnum = 1;
-%             end
-            if (ismember(2,obj.STATES))
-                if (ismember(2,obj.STATES2))
+            if (ismember(2,obj.STATES_2W))
+                if (ismember(2,obj.STATES))
                     obj.reportName = 'Abnormal';
                     obj.reportnum = 2;
-                end
+                elseif (sum(obj.STATES_2W)>7)%sequence!!!!
+                    obj.reportName = 'Abnormal';
+                    obj.reportnum = 2;  
+                else
+                    obj.reportName = 'Normal';
+                    obj.reportnum = 1;
+                end  
             else
                 obj.reportName = 'Normal';
                 obj.reportnum = 1;
             end
-
+      
             %obj.label = char(obj.reportName);
-            obj.label = strcat(char(num2str(transpose(obj.STATES))),char(num2str(transpose(obj.STATES_2W))),char(num2str(transpose(obj.STATES2))),char(num2str(transpose(obj.STATES2_2W)))); %cell?
+            obj.label = strcat(char(num2str(transpose(obj.STATES))),char(num2str(transpose(obj.STATES_2W))),char(num2str(transpose(obj.STATES2))),char(num2str(transpose(obj.STATES2_2W))),char(obj.reportName)); %cell?
             %obj.label = strcat(char(num2str(obj.stateList(end-4:end,1))),char(num2str(obj.stateList_2W(end-4:end,1))),char(num2str(obj.stateList2(end-4:end,1))),char(num2str(obj.stateList2_2W(end-4:end,1))));%,char(obj.reportName)); %cell?
             %obj.label = char(obj.label);
 
