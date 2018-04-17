@@ -25,6 +25,8 @@ load('st23predictnoConfidence.mat')
 %load('hmm_data_matrix_anyWalk.mat')
 stateList = [];
 stateList2 = [];
+stateList_2W = [];
+stateList2_2W = [];
 TRGUESS = [[.85],[.15];[.4],[.6]];
 EMITGUESS2 = [[.4],[.45],[.05];[.05],[.05],[.9]];
 EMITGUESS = [[.33],[.30],[.32],[.05];[.03],[.04],[.03],[.9]];
@@ -126,58 +128,66 @@ while ishandle(himg)
                    Move = 'Wave';
                    stateKey = 1;
                    stateKey2 = 1;
+                   stateKey_2W = 1;
+                   stateKey2_2W = 1;
                elseif ((strcmp(predictedStandA,'Stand')&&strcmp(predictedStandB,'Stand'))...
                        || (strcmp(predictedStandA,'Stand')&&strcmp(predictedStandC,'Stand'))...
                        || (strcmp(predictedStandB,'Stand')&&strcmp(predictedStandC,'Stand')))
                         Move = 'Stand';
                         stateKey = 3;
                         stateKey2 = 1;
-%                else
-%                    Wave = 'Abnormal';
-               elseif ((strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkB,'Walk'))...
-                       || (strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkC,'Walk'))...
-                       || (strcmp(predictedWalkB,'Walk')&&strcmp(predictedWalkC,'Walk')))
-                        Move = 'Walk';
-                        stateKey = 2;
-                        stateKey2 = 2;
-%                elseif ((strcmp(predictedStandA,'Stand')&&strcmp(predictedStandB,'Stand'))...
-%                        || (strcmp(predictedStandA,'Stand')&&strcmp(predictedStandC,'Stand'))...
-%                        || (strcmp(predictedStandB,'Stand')&&strcmp(predictedStandC,'Stand')))
-%                         Move = 'Stand';
-%                         stateKey = 3;
-                else
+                        stateKey_2W = 3;
+                        stateKey2_2W = 1;
+               else
                         Move = 'Abnormal';
                         stateKey = 4;
                         stateKey2 = 3;
+                        stateKey_2W = 4;
+                        stateKey2_2W = 3;
                end
+               
+               if strcmp(Move,'Abnormal')
+                   if ((strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkB,'Walk'))...
+                           || (strcmp(predictedWalkA,'Walk')&&strcmp(predictedWalkC,'Walk'))...
+                           || (strcmp(predictedWalkB,'Walk')&&strcmp(predictedWalkC,'Walk')))
+                       Move = 'Walk';
+                       stateKey_2W = 2;
+                       stateKey2_2W = 2;
+                   elseif (strcmp(predictedWalkA,'Walk')||strcmp(predictedWalkB,'Walk')...
+                           ||strcmp(predictedWalkC,'Walk'))
+                   %    Move = 'Walk';
+                       stateKey = 2;
+                       stateKey2 = 2;
+                   end
                 
                stateList = [stateList;stateKey];
                stateList2 = [stateList2;stateKey2];
-%                        ||strcmp(predictedWalkB,'Walk')...
-%                        ||strcmp(predictedWalkC,'Walk'))
-%                    state = 'Walk';
-%                    stateKey = 2;
-%                else 
-%                    state = 'Abnormal';
-%                    stateKey = 3;
-%                end
+               stateList_2W = [stateList_2W;stateKey_2W];
+               stateList2_2W = [stateList2_2W;stateKey2_2W];
+
+               fid = fopen('test.csv', 'w') ;
+               filename = sprintf('JWC_hmm_data_4versions.csv');
+               dataLine = [thisJWC,stateKey,stateKey2,stateKey_2W,stateKey2_2W];
+               dlmwrite(filename,dataLine,'-append','delimiter',',')
+               fclose(fid)
+               
 %                
-               if (loop > 4)
-%                    last3 = [last3,stateKey];
-%                    last3 = last3(1,2:4);
-%                    last3Name = [last3Name,state];
-%                    last3Name = last3Name(1,2:4);
-                   STATES = hmmviterbi(transpose(stateList(end-4:end,1)),ESTTR,ESTEMIT);
-                   STATES2 = hmmviterbi(transpose(stateList2(end-4:end,1)),ESTTR2,ESTEMIT2);
-                   %STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
-               elseif (loop <= 4)
-%                    last3 = [last3,stateKey];
-%                    last3Name = [last3Name,state];
-%                    STATES = hmmviterbi(last3,ESTTR_2W,ESTEMIT_2W);
-%                    STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
-                    STATES = hmmviterbi(transpose(stateList(end,1)),ESTTR,ESTEMIT);
-                    STATES2 = hmmviterbi(transpose(stateList2(end,1)),ESTTR2,ESTEMIT2);
-               end
+%                if (loop > 4)
+% %                    last3 = [last3,stateKey];
+% %                    last3 = last3(1,2:4);
+% %                    last3Name = [last3Name,state];
+% %                    last3Name = last3Name(1,2:4);
+%                    STATES = hmmviterbi(transpose(stateList(end-4:end,1)),ESTTR,ESTEMIT);
+%                    STATES2 = hmmviterbi(transpose(stateList2(end-4:end,1)),ESTTR2,ESTEMIT2);
+%                    %STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
+%                elseif (loop <= 4)
+% %                    last3 = [last3,stateKey];
+% %                    last3Name = [last3Name,state];
+% %                    STATES = hmmviterbi(last3,ESTTR_2W,ESTEMIT_2W);
+% %                    STATES_anyW = hmmviterbi(last3,ESTTR_anyW,ESTEMIT_anyW);
+%                     STATES = hmmviterbi(transpose(stateList(end,1)),ESTTR,ESTEMIT);
+%                     STATES2 = hmmviterbi(transpose(stateList2(end,1)),ESTTR2,ESTEMIT2);
+%                end
                
 %                if (ismember(2,STATES_anyW))
 %                    if (ismember(2,STATES))
@@ -190,33 +200,28 @@ while ishandle(himg)
 %                    report = 'Normal'
 %                    reportnum = 1;
 %                end
-                if (ismember(2,STATES2))
-                   if (ismember(2,STATES))
-                       report = 'Abnormal'
-                       reportnum = 2;
-%                        send_text_message('925-337-5087','Verizon', 'Smart Camera: Security Alert!')
-%                        sendmail('aweber13@lion.lmu.edu','Smart Security System: Alert!','Smart Security System: Alert!')
-                   end
-               else
-                   report = 'Normal'
-                   reportnum = 1;
-               end
-               display (report)
+%                 if (ismember(2,STATES2))
+%                    if (ismember(2,STATES))
+%                        report = 'Abnormal'
+%                        reportnum = 2;
+% %                        send_text_message('925-337-5087','Verizon', 'Smart Camera: Security Alert!')
+% %                        sendmail('aweber13@lion.lmu.edu','Smart Security System: Alert!','Smart Security System: Alert!')
+%                    end
+%                else
+%                    report = 'Normal'
+%                    reportnum = 1;
+%                end
+%                display (report)
 %                
-%                fid = fopen('test.csv', 'w') ;
-% %                filename = sprintf('JWC_hmm_labels_Walk_Mohammed.csv');
-%                 filename = sprintf('JWC_Left_Wave_Amy.csv');
-%                dataLine = [thisJWC];
-%                dlmwrite(filename,dataLine,'-append','delimiter',',')
-%                fclose(fid)
+               
 %                
 %                allPlaces = {char(last3Name),char(num2str(STATES)),char(num2str(STATES_anyW)),char(report)};
 %                scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end),scoreWave(end)]];
-                 if (length(stateList)>5)
-                       display(transpose(stateList2(end-4:end,1)));
-                 else
-                     display(stateList2(end,1));
-                 end
+%                  if (length(stateList)>5)
+%                        display(transpose(stateList2(end-4:end,1)));
+%                  else
+%                      display(stateList2(end,1));
+%                  end
                  %scoreTable = [scoreTable; [scoreWalk(end),scoreStand(end),scoreWave(end)]];
            end
            allLabels = [];
