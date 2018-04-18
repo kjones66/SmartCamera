@@ -15,6 +15,9 @@ EMITGUESS = [[.33],[.30],[.32],[.05];[.03],[.04],[.03],[.9]];
 [ESTTR2,ESTEMIT2] = hmmtrain(data(:,62),TRGUESS,EMITGUESS2);
 [ESTTR_2W,ESTEMIT_2W] = hmmtrain(data(:,63),TRGUESS,EMITGUESS);
 [ESTTR2_2W,ESTEMIT2_2W] = hmmtrain(data(:,64),TRGUESS,EMITGUESS2);
+alertRecord = [];
+firstAlertSent = 0;
+countSinceSent = 0;
 
 % Initialize Camera
 [vid, depthVid, himg, src] = InitializeKinect();
@@ -44,14 +47,17 @@ while ishandle(himg)
        skeletonJoints = depthMetaData.JointDepthIndices(:,:,depthMetaData.IsSkeletonTracked);
        allPlaces = [];
        if (firstLoop ==0)
+            sendAlert = 0;
+            alertMessage = [];
             for i = 1:numberOfPeople                  
                ThisPerson(i).getBehavior(VelocityDiffJWC(1,(person(i)-1)*60+1:person(i)*60));
-               allPlaces = [allPlaces,ThisPerson(i).label];
-             
-%                if (ThisPerson.reportnum == 2)
-%                        send_text_message('925-337-5087','Verizon', 'Smart Camera: Security Alert!')
-%                        sendmail('aweber13@lion.lmu.edu','Smart Security System: Alert!','Smart Security System: Alert!')
-%                end
+               currentLabel = {strcat('Person  ', num2str(ThisPerson(i).ID), ': ', ThisPerson(i).label)};
+               allPlaces = [allPlaces,currentLabel];
+               display(allPlaces)
+               alertMessage = strcat(alertMessage,'Person  ', num2str(ThisPerson(i).ID), ' behavior: ',ThisPerson(i).reportName);
+                if (ThisPerson(i).reportnum == 2)
+                   sendAlert = 1;
+                end
                
 %                fid = fopen('test.csv', 'w') ;
                %filename = sprintf('JWC_hmm_labels_Walk_Mohammed.csv');
@@ -61,6 +67,7 @@ while ishandle(himg)
 %                fclose(fid)    
             end
 
+           
            allLabels = [];
            lineOptions = [{':o'}, {':go'},{':ko'}, {':ro'}, {':po'}, {':yo'}];
            hold on;
@@ -69,10 +76,38 @@ while ishandle(himg)
                plot(skeletonJoints(:,1,i),skeletonJoints(:,2,i),currentSym);
            end
            hold off;
-           allPlaces = char(allPlaces);
-           lgd = legend(allPlaces);
+           lgd = legend(char(allPlaces));
            lgd.FontSize = 20;
 %            set(gcf,'units','normalized','outerposition',[0 0 1 1])
+           
+           alertRecord = [alertRecord;sendAlert];
+           if (sendAlert ==1)
+               if (firstAlertSent ==0)
+                   pic = sprintf('%d_%d_%d_%d.jpg',d.AbsTime(2),...
+                       d.AbsTime(3),d.AbsTime(1),d.FrameNumber);
+                   saveas(figure(1),fullfile('T:\Kinect Data',pic));
+                   filePath = fullfile('T:\Kinect Data',pic); % 'T:\Kinect Data\waveScreenshot.png';
+                   send_text_message('925-337-5087','Verizon', ['Warning! Suspicious behavior detected. ',alertMessage])
+                   sendmail('aweber13@lion.lmu.edu','Smart Security System: Warning! Suspicious behavior detected.',alertMessage,filePath)
+                   firstAlertSent = 1;
+                   countSinceSent = 0;
+               elseif (countSinceSent > 30)
+                   if (sum(alertRecord(end-30:end))>10)
+                       pic = sprintf('%d_%d_%d_%d.jpg',d.AbsTime(2),...
+                           d.AbsTime(3),d.AbsTime(1),d.FrameNumber);
+                       saveas(figure(1),fullfile('T:\Kinect Data',pic));
+                       filePath = fullfile('T:\Kinect Data',pic); % 'T:\Kinect Data\waveScreenshot.png';
+                       send_text_message('925-337-5087','Verizon', ['Urgent! Suspicious behavior ongoing.',alertMessage])
+                       sendmail('aweber13@lion.lmu.edu','Smart Security System: Urgent! Suspicious behavior ongoing.',alertMessage,filePath)
+                    end
+                    countSinceSent = 0;
+               end
+           end
+           countSinceSent = countSinceSent + 1;
+           display(countSinceSent)
+           display(alertRecord(end))
+
+
        end
        firstLoop = 0;
      %  scoreTable

@@ -217,8 +217,8 @@ classdef personClass2 < handle
                 obj.reportnum = 1;
             end
       
-            %obj.label = char(obj.reportName);
-            obj.label = strcat(char(num2str(transpose(obj.STATES))),char(num2str(transpose(obj.STATES_2W))),char(num2str(transpose(obj.STATES2))),char(num2str(transpose(obj.STATES2_2W))),char(obj.reportName)); %cell?
+            obj.label = char(obj.reportName);
+            %obj.label = strcat(char(num2str(transpose(obj.STATES))),char(num2str(transpose(obj.STATES_2W))),char(num2str(transpose(obj.STATES2))),char(num2str(transpose(obj.STATES2_2W))),char(obj.reportName)); %cell?
             %obj.label = strcat(char(num2str(obj.stateList(end-4:end,1))),char(num2str(obj.stateList_2W(end-4:end,1))),char(num2str(obj.stateList2(end-4:end,1))),char(num2str(obj.stateList2_2W(end-4:end,1))));%,char(obj.reportName)); %cell?
             %obj.label = char(obj.label);
 
